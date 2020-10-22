@@ -90,14 +90,20 @@ async def apply_settings(ctx: wire.Context, msg: ApplySettings):
     if msg.display_rotation is not None:
         await require_confirm_change_display_rotation(ctx, msg.display_rotation)
         storage.device.set_rotation(msg.display_rotation)
-        ui.display.orientation(storage.device.get_rotation())
 
     if msg.experimental_features is not None:
         await require_confirm_experimental_features(ctx, msg.experimental_features)
         storage.device.set_experimental_features(msg.experimental_features)
-        wire.experimental_enabled = msg.experimental_features
+
+    reload_settings_from_storage()
 
     return Success(message="Settings applied")
+
+
+def reload_settings_from_storage() -> None:
+    workflow.idle_timer.set(storage.device.get_autolock_delay_ms(), lock_device)
+    ui.display.orientation(storage.device.get_rotation())
+    wire.experimental_enabled = storage.device.get_experimental_features()
 
 
 async def require_confirm_change_homescreen(ctx):
