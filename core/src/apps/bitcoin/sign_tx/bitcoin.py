@@ -1,6 +1,6 @@
 from micropython import const
 
-from trezor import wire
+from trezor import wire, log
 from trezor.crypto.hashlib import sha256
 from trezor.messages import InputScriptType, OutputScriptType
 from trezor.messages.TxRequest import TxRequest
@@ -47,30 +47,38 @@ class Bitcoin:
     async def signer(self) -> None:
         # Add inputs to hash143 and h_approved and compute the sum of input amounts.
         await self.step1_process_inputs()
+        log.info(__name__, "DONE: 1")
 
         # Add outputs to hash143 and h_approved, approve outputs and compute
         # sum of output amounts.
         await self.step2_approve_outputs()
+        log.info(__name__, "DONE: 2")
 
         # Check fee, approve lock_time and total.
         await self.approver.approve_tx()
+        log.info(__name__, "DONE: approve")
 
         # Verify the transaction input amounts by requesting each previous transaction
         # and checking its output amount. Verify external inputs which have already
         # been signed or which come with a proof of non-ownership.
         await self.step3_verify_inputs()
+        log.info(__name__, "DONE: 3")
 
         # Check that inputs are unchanged. Serialize inputs and sign the non-segwit ones.
         await self.step4_serialize_inputs()
+        log.info(__name__, "DONE: 4")
 
         # Serialize outputs.
         await self.step5_serialize_outputs()
+        log.info(__name__, "DONE: 5")
 
         # Sign segwit inputs and serialize witness data.
         await self.step6_sign_segwit_inputs()
+        log.info(__name__, "DONE: 6")
 
         # Write footer and send remaining data.
         await self.step7_finish()
+        log.info(__name__, "DONE: 7")
 
     def __init__(
         self,
@@ -173,6 +181,7 @@ class Bitcoin:
         self.write_tx_header(self.serialized_tx, self.tx, bool(self.segwit))
         write_bitcoin_varint(self.serialized_tx, self.tx.inputs_count)
 
+        log.info(__name__, "INPUTS: {}".format(self.tx.inputs_count))
         for i in range(self.tx.inputs_count):
             progress.advance()
             if i in self.external:
@@ -180,6 +189,7 @@ class Bitcoin:
             elif i in self.segwit:
                 await self.serialize_segwit_input(i)
             else:
+                log.info(__name__, "SIGNING")
                 await self.sign_nonsegwit_input(i)
 
     async def step5_serialize_outputs(self) -> None:

@@ -81,7 +81,7 @@ test: ## run unit tests
 	cd tests ; ./run_tests.sh $(TESTOPTS)
 
 test_emu: ## run selected device tests from python-trezor
-	$(EMU_TEST) $(PYTEST) $(TESTPATH)/device_tests $(TESTOPTS)
+	$(EMU_TEST) $(PYTEST) $(TESTPATH)/device_tests $(TESTOPTS) -x -k lots_of_inputs
 
 test_emu_monero: ## run selected monero device tests from monero-agent
 	cd tests ; $(EMU_TEST) ./run_tests_device_emu_monero.sh $(TESTOPTS)
