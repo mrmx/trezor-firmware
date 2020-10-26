@@ -84,7 +84,7 @@ def test_show_multisig_3(client):
 def test_show_multisig_xpubs(client):
     nodes = [
         btc.get_public_node(
-            client, tools.parse_path(f"48h/0h/{i}h"), coin_name="Bitcoin"
+            client, tools.parse_path(f"48h/0h/{i}h/0h"), coin_name="Bitcoin"
         )
         for i in range(3)
     ]
@@ -103,8 +103,8 @@ def test_show_multisig_xpubs(client):
             yield  # show address
             assert client.debug.wait_layout().lines == [
                 "Multisig 2 of 3",
-                "34yJV2b2GtbmxfZNw",
-                "jPyuyUYkUbUnogqa8",
+                "33TU5DyVi2kFSGQUf",
+                "mZxNHgPDPqruwdesY",
             ]
 
             client.debug.press_no()
@@ -146,7 +146,7 @@ def test_show_multisig_xpubs(client):
             btc.get_address(
                 client,
                 "Bitcoin",
-                tools.parse_path(f"48h/0h/{i}h/0/0"),
+                tools.parse_path(f"48h/0h/{i}h/0h/0/0"),
                 show_display=True,
                 multisig=multisig,
                 script_type=messages.InputScriptType.SPENDMULTISIG,
